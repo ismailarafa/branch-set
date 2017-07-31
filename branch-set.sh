@@ -2,18 +2,14 @@
 
 set -e
 set -o pipefail
-function getRepos() {
+function setBranches() {
   for repo in "$1"/*; do
     if (cd "$repo"/.git); then
-      printf "Repo name: %s\n" "$repo"
-      $setRemote cd "$repo" "$2"
+      curRemote=$(cat "$repo"/.git/config | grep -E "url")
+      sed -i "" "s/$2/$3/" "$repo"/.git/config
+      newRemote=$(cat "$repo"/.git/config | grep -E "url")
+      printf "Repo name: \t\t%s\nCurrent branch: %s\nNew branch: \t%s\n" "$repo" "$curRemote" "$newRemote"
     fi
   done
 }
-getRepos "$1" "$2"
-
-function setRemote() {
-  cd "$1"
-  dir=(pwd | grep -o "[^/]*$")
-  git remote set-url origin "http://github.com/{$2}/{$dir}.git"
-}
+setBranches "$1" "$2" "$3"
